@@ -17,7 +17,6 @@ RUN git config --global core.editor "nano"
 # Clone the project
 RUN git clone https://github.com/migueel-st/pix2pix-pokemon.git
 WORKDIR /pix2pix-pokemon
-RUN git checkout chore/setup
 
 # Install dependencies
 RUN conda env create -f environment.yml && conda clean -afy
