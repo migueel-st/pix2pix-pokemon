@@ -23,7 +23,9 @@ Image-to-Image Translation with Conditional Adversarial Networks.<br>
 
 - [ ] Train on a subset of Pokémon (e.g., starters or first 150).
 
-- [ ] Train on full dataset
+- [ ] Train on full [dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types)
+
+- [ ] Train on an even [bigger dataset](https://www.kaggle.com/datasets/djilax/pkmn-image-dataset/data) (might need to do manual labeling of the pokemon types or run it through some pre-trained pokemon type classifier)
 
 - [ ] Experiment with hyperparameters (batch size, learning rate, epochs, etc.).
 
