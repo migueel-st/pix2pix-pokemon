@@ -1,6 +1,5 @@
 .DS_Store
 debug*
-datasets/
 checkpoints/
 results/
 build/
@@ -44,3 +43,7 @@ test/data/legacy_serialized.pt
 
 #Ignore Wandb
 wandb/
+
+datasets/
+prepare/
+.vscode/

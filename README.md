@@ -11,19 +11,21 @@ Image-to-Image Translation with Conditional Adversarial Networks.<br>
 ## TODO
 
 ### 🔧 Data Preparation
-- [ ] Collect or create silhouette masks of Pokémon.
+- [x] Collect or create silhouette masks of Pokémon.
 
-- [ ] Assign and apply colors to masks based on Pokémon primary types.
+- [x] Assign and apply colors to masks based on Pokémon primary types.
 
-- [ ] Pair masks with corresponding official Pokémon images for training.
+- [x] Pair masks with corresponding official Pokémon images for training.
 
 
 🏋️ Training
-- [ ] Define training/validation split.
+- [x] Define training/validation split.
 
 - [ ] Train on a subset of Pokémon (e.g., starters or first 150).
 
-- [ ] Train on full dataset
+- [ ] Train on full [dataset](https://www.kaggle.com/datasets/vishalsubbiah/pokemon-images-and-types)
+
+- [ ] Train on an even [bigger dataset](https://www.kaggle.com/datasets/djilax/pkmn-image-dataset/data) (might need to do manual labeling of the pokemon types or run it through some pre-trained pokemon type classifier)
 
 - [ ] Experiment with hyperparameters (batch size, learning rate, epochs, etc.).
 
@@ -36,7 +38,7 @@ Image-to-Image Translation with Conditional Adversarial Networks.<br>
 - [ ] Explore diversity and consistency of generations by varying the mask slightly.
 
 📈 Enhancements
-- [ ]Add a GUI or notebook interface to draw/select a silhouette and type.
+- [ ] Add a GUI or notebook interface to draw/select a silhouette and type.
 
 - [ ] Add secondary type handling (e.g., gradient or dual-color silhouettes).
 
