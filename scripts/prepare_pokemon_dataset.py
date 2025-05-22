@@ -6,6 +6,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from cv2.typing import MatLike
+from sklearn.model_selection import train_test_split
 
 # TODO: move this to a config file
 type_to_color = {
@@ -87,9 +88,50 @@ def segment_pokemon_threshold(image_path):
     _, binary = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY_INV)
     return binary
 
+def concat_images_and_masks(dataset_path: Path):
+    """Concatenate images and masks for each type in the dataset."""
+    paired_images_path = dataset_path / "paired"
+    paired_images_path.mkdir(parents=True, exist_ok=True)
+    types_path = dataset_path / "types"
+    for type_dir in types_path.iterdir():
+        for image_path in type_dir.iterdir():
+            if "_mask" not in image_path.stem:
+                mask_path = type_dir / f"{image_path.stem}_mask.png"
+                if mask_path.exists():
+                    image = cv2.imread(str(image_path))
+                    mask = cv2.imread(str(mask_path))
+                    concat = np.concatenate((mask, image), axis=1)
+                    cv2.imwrite(str(paired_images_path / f"{type_dir.name}_{image_path.stem}.png"), concat)
+    print("Concatenated images and masks ✅")
+    print("Images and masks are concatenated in the '<dataset_path>/paired' directory.")
+
+
+def custom_train_test_split(dataset_path: Path, test_size: float = 0.2):
+    """Split the dataset into training and testing sets."""
+    images_path = dataset_path / "paired"
+    # TODO: Add this as a command line argument
+    filenames = [f for f in os.listdir(images_path) if f.endswith(".png")]
+    pokemon_types = [filename.split("_")[0] for filename in filenames]
+    train_filenames, test_filenames = train_test_split(
+        filenames,
+        test_size=test_size,
+        stratify=pokemon_types,
+    )
+    for dataset in ["train", "test"]:
+        output_path = dataset_path.parents[1] / "datasets" / "pokemon" / dataset
+        output_path.mkdir(parents=True, exist_ok=True)
+        for filename in (train_filenames if dataset == "train" else test_filenames):
+            src = images_path / filename
+            dst = output_path / filename
+            os.rename(src, dst)
+    print(f"Dataset split into {len(train_filenames)} training and {len(test_filenames)} testing images.")
+    print(f"Training images are in {output_path.parent / 'datasets' / 'pokemon' / 'train'}")
+    print(f"Testing images are in {output_path.parent / 'datasets' / 'pokemon' / 'test'}")
+
 if __name__ == "__main__":
     # TODO: Add this as a command line argument
-    dataset_path = Path("prepare") / "pokemon-images-and-types"
-    split_pokemon_dataset_by_type(dataset_path)
-    create_type_masks(dataset_path)
-    # concat_image_and_masks(dataset_path)
+    downloaded_dataset_path = Path("prepare") / "pokemon-images-and-types"
+    split_pokemon_dataset_by_type(downloaded_dataset_path)
+    create_type_masks(downloaded_dataset_path)
+    concat_images_and_masks(downloaded_dataset_path)
+    custom_train_test_split(downloaded_dataset_path, test_size=0.1)
