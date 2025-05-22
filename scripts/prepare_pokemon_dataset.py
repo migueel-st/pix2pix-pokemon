@@ -9,13 +9,13 @@ from cv2.typing import MatLike
 
 # TODO: move this to a config file
 type_to_color = {
-    "bug": (0, 255, 0),
+    "bug": (0, 255, 150),
     "dark": (0, 0, 0),
     "dragon": (0, 0, 255),
     "electric": (255, 255, 0),
     "fairy": (255, 182, 193),
     "fighting": (255, 0, 0),
-    "fire": (255, 69, 0),
+    "fire": (255, 150, 0),
     "flying": (135, 206, 250),
     "ghost": (128, 0, 128),
     "grass": (0, 255, 0),
@@ -26,7 +26,7 @@ type_to_color = {
     "psychic": (255, 20, 147),
     "rock": (139, 69, 19),
     "steel": (192, 192, 192),
-    "water": (0, 0, 255),
+    "water": (0, 150, 255),
 }
 
 
@@ -47,6 +47,7 @@ def split_pokemon_dataset_by_type(dataset_path: Path):
     print("Dataset prepared ✅")
     print("Images are organized by type in the '<dataset_path>/types' directory.")
 
+
 def convert_transparent_to_white(input_path: str, output_path: str):
     """Convert transparent PNG images to white background JPG images."""
     image = cv2.imread(input_path, cv2.IMREAD_UNCHANGED)    
@@ -56,38 +57,39 @@ def convert_transparent_to_white(input_path: str, output_path: str):
     new_img = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
     cv2.imwrite(output_path, new_img)
 
+
 def create_type_masks(dataset_path: Path):
     """Create color masks for each type in the dataset."""
     types_path = dataset_path / "types"
     for type_dir in types_path.iterdir():
         for image_path in type_dir.iterdir():
-            binary = segment_pokemon_threshold(str(image_path), str(type_dir / f"{image_path.stem}_mask.png"))
-            refined_mask = refine_with_contours(binary)
-            cv2.imwrite(str(type_dir / f"{image_path.stem}_refined_mask.png"), refined_mask)
+            binary = segment_pokemon_threshold(str(image_path))
+            color = tuple(type_to_color[type_dir.name])
+            colored_mask = refine_with_contours(binary, color)
+            cv2.imwrite(str(type_dir / f"{image_path.stem}_mask.png"), colored_mask)
 
-def refine_with_contours(mask):
-    # Find contours in the mask
+
+def refine_with_contours(mask, color):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # Filter for largest contour (assumes Pokémon is largest blob)
     largest_contour = max(contours, key=cv2.contourArea)
-    blank_mask: MatLike = np.zeros_like(mask)  # type: ignore
+    blank_mask: MatLike = cv2.cvtColor(np.full_like(mask,  255), cv2.COLOR_GRAY2BGR)
     refined_mask = cv2.drawContours(blank_mask,
                                     contours=[largest_contour],
                                     contourIdx=-1,
-                                    color=(255, 255, 255),
+                                    color=color,
                                     thickness=cv2.FILLED)
-    return refined_mask
+    return cv2.cvtColor(refined_mask, cv2.COLOR_BGR2RGB)
 
-def segment_pokemon_threshold(image_path, output_path):
-    # Load image
+
+def segment_pokemon_threshold(image_path):
     img = cv2.imread(image_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # This is a simple thresholding method to create a mask
-    _, thresh = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY_INV)
-    cv2.imwrite(output_path, thresh)
-    return thresh
+    _, binary = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY_INV)
+    return binary
+
 if __name__ == "__main__":
     # TODO: Add this as a command line argument
     dataset_path = Path("prepare") / "pokemon-images-and-types"
     split_pokemon_dataset_by_type(dataset_path)
     create_type_masks(dataset_path)
+    # concat_image_and_masks(dataset_path)
